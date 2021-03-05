@@ -1,0 +1,1 @@
+curl --location --request GET '127.0.0.1:5002/availability?id=f1390553-7c54-11eb-bb48-10f005a764c0&AvailabilityTarget=0.9999&maxSFC=5'
