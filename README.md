@@ -35,8 +35,7 @@ python mainRestAPI.py
 ## The Algorithm 
 
 HASFC relies on a designed-from-scratch algorithm (named HASFCBuilder) which is equipped with: i) an availability model builder aimed to construct probabilistic models of the SFC nodes in terms of failure/repair actions; ii) a chaining and selection module to compose the possible redundant SFCs, and extract the best candidates thereof. 
-Take a look to our Python code available here: XXX
 
 ## Running the Tests
 
-Testing the functionalities of HASFC and HASFCBuilder is quite easy. A simple REST client (e.g. Insomnia) can be freely downloaded to test the whole environment. 
+Testing the functionalities of HASFC and HASFCBuilder is quite easy. A simple REST client (e.g. Postman or Insomnia) can be freely downloaded to test the whole environment. 
