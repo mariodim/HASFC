@@ -3,6 +3,7 @@
 ### Getting Started
 
 HASFC is a platform designed to support, through a dedicated REST interface, the MANagement and Orchestration (MANO) infrastructure in deploying SFCs with an optimal availability/cost trade off.
+![alt text] https://github.com/mariodim/HASFC/blob/main/hasfc.png
 
 ## Prerequisites
 ```sh
