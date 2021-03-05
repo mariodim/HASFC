@@ -38,4 +38,6 @@ HASFC relies on a designed-from-scratch algorithm (named HASFCBuilder) which is 
 
 ## Running the Tests
 
-Testing the functionalities of HASFC and HASFCBuilder is quite easy. A simple REST client (e.g. Postman or Insomnia) can be freely downloaded to test the whole environment. 
+Testing the functionalities of HASFC and HASFCBuilder is quite easy. A simple REST client (e.g. Postman or Insomnia) can be freely downloaded to test the whole environment. We have prepared two sample requests:
+- POST: it contains all the parameters to perform a complete query to the HASFC. (See the file example_post). Note: the IP address 127.0.0.1 must be replaced with the IP address where HASFC is running.
+- GET:  it contains the simplest query to the HASFC (parameters: availability target and number of max SFCs to visualize). (See the file example_get). Note: the IP address 127.0.0.1 must be replaced with the IP address where HASFC is running.
