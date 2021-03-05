@@ -6,11 +6,23 @@ HASFC is a platform designed to support, through a dedicated REST interface, the
 
 ## Prerequisites
 ```sh
-- Windows-based or Linux-based platforms 
-- TimeNET (https://timenet.tu-ilmenau.de) freely available for non-commercial purposes
-- Python (>= )
+- Windows-based (actually tested on Win10) or Linux-based platforms 
+- TimeNET 4.5 or higher (https://timenet.tu-ilmenau.de) freely available for non-commercial purposes
+- Python 3.6 or higher
 ```
-
+## Setup
+For Win users: add the file SOLVE.bat in the folder 
+```sh
+C:\Program Files (x86)\TimeNET\TimeNET\EDSPN\StatAnalysis\scripts
+```
+To automatically setup all the needed Python libraries run the following command:
+```sh
+pip install -r requirements.txt
+```
+Start the REST application through the following command:
+```sh
+python mainRestAPI.py
+```
 
 ## Features
 
