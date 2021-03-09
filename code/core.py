@@ -15,9 +15,9 @@ from multiprocessing import Pool
 DEFINITION = "\nDEFINITION_PARAMETER "
 POSITION = " 9.41 2.07"
 
-def async_operation(id, input_hash, configuration, parameters):
+def async_operation(id, configuration, parameters):
     run_timenet(parameters, id)
-    elaboration(configuration, input_hash, id)
+    elaboration(configuration, id)
 
 def run_timenet(parameters,id):
     max_VNF = min( parameters.pop('maxVNF'), 6)
@@ -95,11 +95,11 @@ def read_result(id):
     result_file.close()
     return result
 
-def elaboration(configuration, input_hash, id):
+def elaboration(configuration, id):
     for threshold in configuration['availability_target']:
-        parallel_elab(configuration, input_hash, id, threshold)
+        parallel_elab(configuration, id, threshold)
 
-def parallel_elab(configuration, input_hash, id, threshold):
+def parallel_elab(configuration, id, threshold):
     weights=configuration['weights']
     costs=configuration['costs']
     t = time.time()
@@ -152,9 +152,6 @@ def parallel_elab(configuration, input_hash, id, threshold):
                         h_writer.writerow(to_write([p,s,i,h], par, cost))
                         if cost < minCost:
                             minCost = cost
-    cache_file = open("CACHE", "a+")
-    cache_file.write(str(input_hash) + ";" + id + "\n")
-    cache_file.close()
     os.remove(filename)
     
 def cost_calculator(configuration, costs=[0.5,0.5,0.5]):

@@ -1,4 +1,5 @@
 import pandas as pd
+import decimal
 
 from flask import Flask, request, jsonify
 from flask_restful import Resource, Api
@@ -43,7 +44,7 @@ def get_availability():
                 return {'Results': out, 'MaxSFC':min (int(maxSFC), 100, len(out)), 'Id' : id}
             except FileNotFoundError:
                 if perc != 100:
-                    return {'Status': 'Success', 'Message': str(perc)+ '% ' +'results ready. We will finish as soon as possible', 'Id': id}
+                    return {'Status': 'Success', 'Message': str(round(perc,3))+ ' % ' +'results ready. We will finish as soon as possible', 'Id': id}
                 else:
                     return {'Status': 'Error', 'Message': 'Availability Target value requested is not valid.'}
     except Exception as e:
@@ -66,7 +67,12 @@ def availability():
         return message
     
     pool=Pool(1)
-    pool.apply_async(async_operation, [id, input_hash, configuration, parameters])
+    pool.apply_async(async_operation, [id, configuration, parameters])
+    
+    cache_file = open("CACHE", "a+")
+    cache_file.write(str(input_hash) + ";" + id + "\n")
+    cache_file.close()
+    
     return {'Status': 'Success', 'Message': 'Results will be available as soon as possible. Use the Id to access.', 'Id' : id}
 
 if __name__ == '__main__':
