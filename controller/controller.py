@@ -7,7 +7,7 @@ from source.cache import *
 from source.validation import ValidationException
 
 
-def availability_post(parameters, configuration):  
+def availability_post(configuration, parameters):  
     input_hash = hash_input(parameters,configuration)
     id = check_cache(input_hash)
     if id is not None:
