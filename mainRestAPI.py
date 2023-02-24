@@ -1,8 +1,7 @@
 import pandas as pd
-import decimal
 
-from flask import Flask, request, jsonify
-from flask_restful import Resource, Api
+from flask import Flask, request
+from flask_restful import Api
 from waitress import serve
 
 from multiprocessing import Pool
@@ -31,17 +30,16 @@ def get_availability():
             for last_line in logfile:
                 pass
                 
-            values = last_line.split('\n')[0].split('|')
-            perf = eval(values[-1])
-                    
+            values = last_line.split('\n')[0].split('|')                    
             perc=float(values[0])/float(values[1]) * 100
         
             out_filename = "results//" + id + "_" + str(availability_target) + "_results.csv"
             
             try:
+                n_sfc=int(maxSFC) if int(maxSFC)<100 else 100
                 df = pd.read_csv(out_filename,sep=';').sort_values(by=['cost'])
-                out = df[:int(maxSFC) if int(maxSFC)<100 else 100].to_dict(orient='records')
-                return {'Results': out, 'MaxSFC':min (int(maxSFC), 100, len(out)), 'Id' : id}
+                out = df[:n_sfc].to_dict(orient='records')
+                return {'Results': out, 'MaxSFC':min (n_sfc, len(out)), 'Id' : id}
             except FileNotFoundError:
                 if perc != 100:
                     return {'Status': 'Success', 'Message': str(round(perc,3))+ ' % ' +'results ready. We will finish as soon as possible', 'Id': id}
@@ -69,9 +67,8 @@ def availability():
     pool=Pool(1)
     pool.apply_async(async_operation, [id, configuration, parameters])
     
-    cache_file = open("CACHE", "a+")
-    cache_file.write(str(input_hash) + ";" + id + "\n")
-    cache_file.close()
+    with open("CACHE", "a+") as cache_file:
+        cache_file.write(str(input_hash) + ";" + id + "\n")
     
     return {'Status': 'Success', 'Message': 'Results will be available as soon as possible. Use the Id to access.', 'Id' : id}
 
