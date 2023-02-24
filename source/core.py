@@ -1,16 +1,12 @@
-import sys
 import subprocess
 import os
-import argparse
 import shutil
 
 import csv
 import itertools
 import time
-import copy
 
-from code.cache import *
-from multiprocessing import Pool
+from source.cache import *
 
 DEFINITION = "\nDEFINITION_PARAMETER "
 POSITION = " 9.41 2.07"
@@ -20,77 +16,83 @@ def async_operation(id, configuration, parameters):
     elaboration(configuration, id)
 
 def run_timenet(parameters,id):
-    max_VNF = min( parameters.pop('maxVNF'), 6)
-    max_NR = min( parameters.pop('maxNR'), 4)
- 
-    header_values_to_timenet=""
-    for key in parameters:
-        if isinstance(parameters[key],float) or isinstance(parameters[key],int):
-            header_values_to_timenet = header_values_to_timenet + DEFINITION + key + " " + str(parameters[key]) + POSITION
-
-    counter = 0
-    values = set()
-    for subset in itertools.combinations_with_replacement( [k for k in range(max_VNF, -1, -1)], int(max_NR)):
-        values.add(subset)
-
-    # Init log file
-    log_file = open("logs//" + id + "_log", "a+")
-    log_file.write(str(counter) + "|" + str(len(values)*2) + "\n")
-    log_file.close()
+    try:
+        max_VNF = min( parameters.pop('maxVNF'), 6)
+        max_NR = min( parameters.pop('maxNR'), 4)
     
-    # Init output file
-    output_file = open(id+".csv","w+")
-    output_file.write("VNF1;VNF2;VNF3;VNF4;perf;parallelo\n")
-    for perf in range(3,5):
-        for value in values:
-            VNF1=value[0]             
-            VNF2=0 if len(value) < 2 else value[1]   
-            VNF3=0 if len(value) < 3 else value[2]   
-            VNF4=0 if len(value) < 4 else value[3]  
-            counter += 1
-            if VNF1+VNF2+VNF3+VNF4 > perf: 
-                timenet_values = header_values_to_timenet + DEFINITION + "VNF1 "+ str(VNF1) + POSITION + DEFINITION + "VNF2 " + str(VNF2) + POSITION + DEFINITION + "VNF3 " + str(VNF3) + POSITION + DEFINITION + "VNF4 " + str(VNF4) + POSITION + "\n"     
-                    
-                input_file_to_timenet = open("homogeneous\\data_" + id,'w')
-                input_file_to_timenet.write(timenet_values)
-                input_file_to_timenet.close()
-                
-                try:
-                    compose_timenet_file(id)
-                                
-                    subprocess.check_output("rm -rf " + id + ".dir")
-                    subprocess.run('"C:\\Program Files (x86)\\TimeNET\\TimeNET\\EDSPN\\StatAnalysis\\scripts\\SOLVE.bat" '+ id + ' -E -s -i 10000 1e-10', stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-                    
-                    result = read_result(id)                
-                    output_file.write(";".join([str(VNF1), str(VNF2), str(VNF3), str(VNF4), str(perf), str(result)]) + "\n")
-                except:
-                    time.sleep(1)
-                    compose_timenet_file(id)
-                    
-                    subprocess.check_output('"C:\\Program Files (x86)\\TimeNET\\TimeNET\\EDSPN\\StatAnalysis\\scripts\\SOLVE.bat"'+' '+ id + ' -E -s -i 10000 1e-10')
-                    
-                    result = read_result(id) 
-                    output_file.write(";".join([str(VNF1), str(VNF2), str(VNF3), str(VNF4), str(perf), str(result)]) + "\n")
+        header_values_to_timenet=""
+        for key in parameters:
+            if isinstance(parameters[key],float) or isinstance(parameters[key],int):
+                header_values_to_timenet = f'{header_values_to_timenet}{DEFINITION}{key} {parameters[key]}{POSITION}'
 
-            log_file = open("logs//" + id + "_log", "a+")
-            log_file.write(str(counter) + "|" + str(len(values)*2) + "\n")
-            log_file.close()    
-    
-    output_file.close()
-    shutil.rmtree(id+".dir")
-    os.remove("homogeneous\\data_"+id)
+        counter = 0
+        values = set()
+        for subset in itertools.combinations_with_replacement( [k for k in range(max_VNF, -1, -1)], int(max_NR)):
+            values.add(subset)
+
+        # Init log file
+        log_file = open(f"logs//{id}_log", "a+")
+        log_file.write(f"{counter}|{len(values)*2}\n")
+        log_file.close()
+        
+        # Init output file
+        output_file = open(f"{id}.csv","w+")
+        output_file.write("VNF1;VNF2;VNF3;VNF4;perf;parallelo\n")
+        for perf in range(3,5):
+            for value in values:
+                VNF1=value[0]             
+                VNF2=0 if len(value) < 2 else value[1]   
+                VNF3=0 if len(value) < 3 else value[2]   
+                VNF4=0 if len(value) < 4 else value[3]  
+                counter += 1
+                if VNF1+VNF2+VNF3+VNF4 > perf: 
+                    timenet_values = f'{header_values_to_timenet} {DEFINITION} VNF1 {VNF1}{POSITION}{DEFINITION} VNF2 {VNF2}{POSITION}{DEFINITION} VNF3 {VNF3}{POSITION}{DEFINITION} VNF4 {VNF4}{POSITION}\n'     
+                        
+                    input_file_to_timenet = open(f"homogeneous\\data_{id}",'w')
+                    input_file_to_timenet.write(timenet_values)
+                    input_file_to_timenet.close()
+                    
+                    try:
+                        compose_timenet_file(id)
+                                    
+                        subprocess.check_output(f"rm -rf {id}.dir")
+                        subprocess.run('"C:\\Program Files (x86)\\TimeNET\\TimeNET\\EDSPN\\StatAnalysis\\scripts\\SOLVE.bat" '+ id + ' -E -s -i 10000 1e-10', stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+                        
+                        result = read_result(id)                
+                        output_file.write(f"{VNF1};{VNF2};{VNF3};{VNF4};{perf};{result}\n")
+                    except:
+                        time.sleep(1)
+                        compose_timenet_file(id)
+                        
+                        subprocess.check_output('"C:\\Program Files (x86)\\TimeNET\\TimeNET\\EDSPN\\StatAnalysis\\scripts\\SOLVE.bat"'+' '+ id + ' -E -s -i 10000 1e-10')
+                        
+                        result = read_result(id) 
+                        output_file.write(f"{VNF1};{VNF2};{VNF3};{VNF4};{perf};{result}\n")
+
+                log_file = open(f"logs//{id}_log", "a+")
+                log_file.write(f"{counter}|{len(values)*2}\n")
+                log_file.close()    
+        
+        output_file.close()
+        shutil.rmtree(id+".dir")
+        os.remove("homogeneous\\data_"+id)
+    except:
+        df=pd.read_csv("cache/CACHE",sep=';')
+        df = df.drop(df[df['path']==id].index)
+        df.to_csv("cache/CACHE",index=False, sep=';')  
+        #fare roba al cache file, rimuovere l'id
 
     
 def compose_timenet_file(id):
-    filenames = ["homogeneous\\header", "homogeneous\\data_"+id, "homogeneous\\footer"]
-    filename_timenet=id + ".TN"
+    filenames = ["homogeneous\\header", f"homogeneous\\data_{id}", "homogeneous\\footer"]
+    filename_timenet=f"{id}.TN"
     with open(filename_timenet, 'w+') as file_timenet:
         for fname in filenames:
             with open(fname) as infile:
                 file_timenet.write(infile.read())
    
 def read_result(id):
-    result_file = open(id + ".dir\\" + id + ".RESULTS")
+    result_file = open(f'{id}.dir\\{id}.RESULTS')
     result = float(result_file.readline().split("result = ")[1])
     result_file.close()
     return result
@@ -102,12 +104,11 @@ def elaboration(configuration, id):
 def parallel_elab(configuration, id, threshold):
     weights=configuration['weights']
     costs=configuration['costs']
-    t = time.time()
-    
-    filename = id + ".csv"
+
+    filename = f"{id}.csv"
     cscf = {}
     hss = {}
-    out_filename = "results//" + id + "_" + str(threshold) + "_results.csv"
+    out_filename = f"results//{id}_{threshold}_results.csv"
     
     with open(filename) as csv_file:
         csv_reader = csv.reader(csv_file, delimiter=';')

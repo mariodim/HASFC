@@ -21,7 +21,7 @@ pip install -r requirements.txt
 ```
 Start the REST application through the following command:
 ```sh
-python mainRestAPI.py
+python app.py
 ```
 
 ## Features
