@@ -1,8 +1,16 @@
-# High Availability Service Function Chain (HASFC)
+# REST-based Framework for Performability Management of Service Function Chains
 
 ### Getting Started
 
-HASFC is a platform designed to support, through a dedicated REST interface, the MANagement and Orchestration (MANO) infrastructure in deploying SFCs with an optimal availability/cost trade off. 
+We have designed a platform designed to support, through a dedicated REST interface, the performability management of Service Function Chains. 
+
+Performance aspects (e.g. guarantee an end-to-end delay of an SFC below a given threshold) are modeled through an M/G/k queueing model. 
+
+Availability aspects (e.g. guarantee that the whole SFC has an availability respecting the so-called five nines) are modeled through the formalism of Stochastic Reward Networks (SRN). 
+
+This notwithstanding, the final user is not supposed to know queueing theory or/and SRN since such aspects are automatically managed from software modules embeddded in our framework. The user just needs to pass some parameters in the JSON query as explained in the following.
+
+The output of the framework is an optimal SFC which automatically meets the desired performance (in terms of delay) and availability (in terms of number of nines) constraints.
 
 ## Prerequisites
 ```sh
@@ -26,18 +34,39 @@ python app.py
 
 ## Features
 
-- Automated stochastic modeling of virtualized nodes (three-layered)
 - Automated composition of Service Function Chains 
+- Performance evaluation of Service Function Chains
 - Availability evaluation of Service Function Chains 
-- Can be used also as a stand-alone framework without the MANO
+- Can be used to support MANagement and Orchestration (MANO) systems
 - Intuitive REST call API
 
-## The Algorithm 
+## SFC architecture and nomenclature
 
-HASFC relies on a designed-from-scratch algorithm (named HASFCBuilder) which is equipped with: i) an availability model builder aimed to construct probabilistic models of the SFC nodes in terms of failure/repair actions; ii) a chaining and selection module to compose the possible redundant SFCs, and extract the best candidates thereof. 
+In our framework, an SFC is a chain of Virtualized Nodes (VN) where:
+- each VN is made of one or more Network Replicas (NR) for redundancy purposes;
+- each NR is made of three layer including: Hardware (HW), Hypervisor (HYP), Virtual Network Function (VNF) 
 
-## Running the Tests
+![SFC](https://github.com/mariodim/HASFC/assets/16385982/c375afeb-0561-40d1-91b2-8190fc01f5b1)
 
-Testing the functionalities of HASFC and HASFCBuilder is quite easy. A simple REST client (e.g. Postman or Insomnia) can be freely downloaded to test the whole environment. We have prepared two sample requests:
-- POST: it contains all the parameters to perform a complete query to the HASFC. (See the file example_post). Note: the IP address 127.0.0.1 must be replaced with the IP address where HASFC is running.
-- GET:  it contains the simplest query to the HASFC (parameters: availability target and number of max SFCs to visualize). (See the file example_get). Note: the IP address 127.0.0.1 must be replaced with the IP address where HASFC is running.
+
+## JSON Query format
+
+The JSON Query to be passed to our framework must contain the following parameters:
+- NumVN: number of VNs composing the SFC;
+- NRmax: max number of NRs constituting each VN;
+- VNFmax: max number of VNF on top of each NR;
+- MTTF_HW: mean time to failure pertinent to the HW layer;
+- MTTF_HYP: mean time to failure pertinent to the HW layer;
+- MTTF_VNF: mean time to failure pertinent to the HW layer;
+- MTTR_HW: mean time to repair pertinent to the HW layer;
+- MTTR_HYP: mean time to repair pertinent to the HW layer;
+- MTTR_VNF: mean time to repair pertinent to the HW layer;
+- \alpha_k: arrival rate of requests to VN k;
+- \beta_k: service rate of VN k;
+- D^*: end-to-end delay threshold
+- A^*: steady-state availability threshold
+
+
+
+
+
