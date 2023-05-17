@@ -2,8 +2,15 @@
 
 ### Getting Started
 
-We have designed a platform designed to support, through a dedicated REST interface, the performability management of Service Function Chains. Performance aspects (e.g. guarantee an end-to-end delay of an SFC below a given threshold) are modeled through an M/G/k queueing model. 
-Availability aspects (e.g. guarantee that the whole SFC has an availability respecting the so-called five nines) are modeled through the formalism of Stochastic Reward Networks (SRN). This notwithstanding, the final user is not supposed to know queueing theory or/and SRN since such aspects are automatically managed from software modules embeddded in our framework. The user just needs to pass some parameters in the JSON query as explained in the following.
+We have designed a platform designed to support, through a dedicated REST interface, the performability management of Service Function Chains. 
+
+Performance aspects (e.g. guarantee an end-to-end delay of an SFC below a given threshold) are modeled through an M/G/k queueing model. 
+
+Availability aspects (e.g. guarantee that the whole SFC has an availability respecting the so-called five nines) are modeled through the formalism of Stochastic Reward Networks (SRN). 
+
+This notwithstanding, the final user is not supposed to know queueing theory or/and SRN since such aspects are automatically managed from software modules embeddded in our framework. The user just needs to pass some parameters in the JSON query as explained in the following.
+
+The output of the framework is an optimal SFC which automatically meets the desired performance (in terms of delay) and availability (in terms of number of nines) constraints.
 
 ## Prerequisites
 ```sh
