@@ -1,7 +1,7 @@
 class ValidationException(Exception):
     pass
 
-def validate_post_input(data):
+def validate_post_availability_input(data):
     if 'Costs' in data and data['Costs'] is not None and len(data['Costs']) == 3:
         try: 
             costs =  [float(k) for k in data['Costs']]
@@ -77,8 +77,7 @@ def validate_parameters(data):
     params['perf'] = 3
     return params
 
-
-def validate_get_input(request):
+def validate_get_availability_input(request):
     if request.args.get('id') is not None:
         id = request.args.get('id') 
     else:
@@ -88,3 +87,9 @@ def validate_get_input(request):
     maxSFC = request.args.get('maxSFC') if request.args.get('maxSFC') is not None else 10
     
     return {'id':id, 'maxSFC':maxSFC, 'availability_target':availability_target}
+
+def validate_post_performability_input(data):
+    pass
+
+def validate_get_performability_input(request):
+    pass
