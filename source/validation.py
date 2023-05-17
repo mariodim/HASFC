@@ -14,6 +14,17 @@ def validate_post_availability_input(data):
         raise ValidationException(
             'Costs should be an array of size 3. Try to use default [1,1,1]')
 
+    availability_target = get_availability_target(data)
+    # pruning algorithm weights, could be configurable
+    weights = [0.5, 0.75, 1, 1.25]
+    configuration = {'costs': costs, 'weights': weights,
+                     'availability_target': availability_target}
+    parameters = validate_parameters(data)
+
+    return configuration, parameters
+
+
+def get_availability_target(data):
     if 'AvailabilityTarget' in data and data['AvailabilityTarget'] is not None:
         if isinstance(data['AvailabilityTarget'], str):
             try:
@@ -35,15 +46,7 @@ def validate_post_availability_input(data):
         raise ValidationException(
             'AvailabilityTarget should be an array of float. Try to use default [0.9999,0.99999,0.999999]')
 
-    # pruning algorithm weights, could be configurable
-    weights = [0.5, 0.75, 1, 1.25]
-
-    configuration = {'costs': costs, 'weights': weights,
-                     'availability_target': availability_target}
-
-    parameters = validate_parameters(data)
-
-    return configuration, parameters
+    return availability_target
 
 
 def validate_param(params, name):
@@ -114,8 +117,62 @@ def validate_get_availability_input(request):
 
 
 def validate_post_performability_input(data):
-    pass
+    performability = get_performability_params(data)
+    availability_target = get_availability_target(data)
+    # pruning algorithm weights, could be configurable
+    weights = [0.5, 0.75, 1, 1.25]
+
+    configuration = {'performability': performability, 'weights': weights,
+                     'availability_target': availability_target}
+    parameters = validate_parameters(data)
+    return configuration, parameters
+
+
+def get_performability_params(data):
+    if 'Alpha' in data and data['Alpha'] is not None:
+        try:
+            alpha = [float(data['Alpha'])] * 4
+        except ValueError:
+            raise ValidationException(
+                'Alpha should be a valid value (numeric). Try to use default 200')
+    else:
+        raise ValidationException(
+            'Alpha should be a valid value (numeric). Try to use default 200')
+    if 'Beta' in data and data['Beta'] is not None and len(
+            data['Beta']) == 3:
+        try:
+            beta = [float(k) for k in data['Beta']]
+        except ValueError:
+            raise ValidationException(
+                'Beta should be an array of float. Try to use default [125,147,185,111]')
+    else:
+        raise ValidationException(
+            'Beta should be an array of size 4. Try to use default [125,147,185,111]')
+    if 'D' in data and data['D'] is not None:
+        try:
+            d = float(data['D'])
+        except ValueError:
+            raise ValidationException(
+                'D should be a valid value (numeric). Try to use default 0.3')
+    else:
+        raise ValidationException(
+            'D should be a valid value (numeric). Try to use default 0.3')
+    performability = {'alpha': alpha, 'beta': beta, 'd': d}
+    return performability
 
 
 def validate_get_performability_input(request):
-    pass
+    if request.args.get('id') is not None:
+        id = request.args.get('id')
+    else:
+        raise ValidationException('You need your id to access your data')
+
+    availability_target = request.args.get('AvailabilityTarget') if request.args.get(
+        'AvailabilityTarget') is not None else '0.9999'
+    maxSFC = request.args.get('maxSFC') if request.args.get(
+        'maxSFC') is not None else 10
+
+    return {
+        'id': id,
+        'maxSFC': maxSFC,
+        'availability_target': availability_target}

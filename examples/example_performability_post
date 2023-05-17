@@ -1,0 +1,25 @@
+curl --location --request POST '127.0.0.1:5002/performability' \
+--header 'Content-Type: application/json' \
+--data-raw '{
+    "Alpha": 200,
+    "Beta": [
+        125,
+        147,
+        185,
+        111
+    ],
+    "D": 0.3,
+    "AvailabilityTarget": [
+        0.99999
+    ],
+    "params": {
+        "muHW":1,
+        "lamHW":10000,
+        "muVM":1,
+        "lamVM":10000,
+        "muVNF":1,
+        "lamVNF":10000,
+        "maxVNF":3,
+        "maxNR":2
+    }
+}'
