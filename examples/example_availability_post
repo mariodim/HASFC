@@ -12,8 +12,8 @@ curl --location --request POST '127.0.0.1:5002/availability' \
     "params": {
         "muHW":1,
         "lamHW":10000,
-        "muVM":1,
-        "lamVM":10000,
+        "muHYP":1,
+        "lamHYP":10000,
         "muVNF":1,
         "lamVNF":10000,
         "maxVNF":3,
