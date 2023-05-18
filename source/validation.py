@@ -65,8 +65,8 @@ def validate_parameters(data):
         paramsJSON = data['params']
         params['muHW'] = validate_param(paramsJSON, 'muHW')
         params['lamHW'] = validate_param(paramsJSON, 'lamHW')
-        params['muVM'] = validate_param(paramsJSON, 'muVM')
-        params['lamVM'] = validate_param(paramsJSON, 'lamVM')
+        params['muHYP'] = validate_param(paramsJSON, 'muHYP')
+        params['lamHYP'] = validate_param(paramsJSON, 'lamHYP')
         params['muVNF'] = validate_param(paramsJSON, 'muVNF')
         params['lamVNF'] = validate_param(paramsJSON, 'lamVNF')
         if 'maxVNF' in paramsJSON and paramsJSON['maxVNF'] is not None:
