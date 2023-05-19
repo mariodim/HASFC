@@ -139,7 +139,7 @@ def get_performability_params(data):
         raise ValidationException(
             'Alpha should be a valid value (numeric). Try to use default 200')
     if 'Beta' in data and data['Beta'] is not None and len(
-            data['Beta']) == 3:
+            data['Beta']) == 4:
         try:
             beta = [float(k) for k in data['Beta']]
         except ValueError:

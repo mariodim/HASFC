@@ -17,15 +17,15 @@ POSITION = " 9.41 2.07"
 def async_operation(id, data):
     if 'performability' in data:
         performability = data['performability']
-        performance_analysis = performance_analysis(performability['alpha'], performability['beta'], performability['d'])
-        run_timenet(data['parameters'], id, performance_analysis)
-        elaboration(data['configuration'], id, performance_analysis)
+        performance_results = performance_analysis(performability['alpha'], performability['beta'], performability['d'])
+        run_timenet(data['parameters'], id, performance_results)
+        elaboration(data['configuration'], id, performance_results)
     else:
         run_timenet(data['parameters'], id)
         elaboration(data['configuration'], id)
 
 
-def run_timenet(parameters, id, performance_analysis=None):
+def run_timenet(parameters, id, performance_results=None):
     try:
         max_VNF = min(parameters.pop('maxVNF'), 6)
         max_NR = min(parameters.pop('maxNR'), 4)
@@ -54,9 +54,9 @@ def run_timenet(parameters, id, performance_analysis=None):
         output_file = open(f"{id}.csv", "w+")
         output_file.write("VNF1;VNF2;VNF3;VNF4;perf;parallelo\n")
         min_perf,max_perf=3,5
-        if performance_analysis != None:
-            min_perf = min(performance_analysis)
-            max_perf = max(performance_analysis)
+        if performance_results is not None:
+            min_perf = int(min(performance_results))
+            max_perf = int(max(performance_results))
         for perf in range(min_perf, max_perf+1):
             for value in values:
                 VNF1 = value[0]
@@ -133,12 +133,12 @@ def read_result(id):
     return result
 
 
-def elaboration(configuration, id, performance_analysis=None):
+def elaboration(configuration, id, performance_results  =None):
     for threshold in configuration['availability_target']:
-        build_chain(configuration, id, threshold, performance_analysis)
+        build_chain(configuration, id, threshold, performance_results   )
 
 
-def build_chain(configuration, id, threshold, performance_analysis=None):
+def build_chain(configuration, id, threshold, performance_results   =None):
 
     if 'costs' not in configuration:
         costs = [1,1,1]
@@ -160,15 +160,15 @@ def build_chain(configuration, id, threshold, performance_analysis=None):
                 line_count += 1
                 continue
             conf = ','.join(row[:4])
-            if performance_analysis != None:
+            if performance_results is not None:
                 if float(row[5].replace(',', '.')) >= threshold:
-                    if int(row[4]) >= performance_analysis[0]:
+                    if int(row[4]) >= performance_results   [0]:
                         p_cscf = float(row[5].replace(',', '.'))
-                    if int(row[4]) >= performance_analysis[1]:
+                    if int(row[4]) >= performance_results   [1]:
                         s_cscf = float(row[5].replace(',', '.'))
-                    if int(row[4]) >= performance_analysis[2]:
+                    if int(row[4]) >= performance_results   [2]:
                         i_cscf = float(row[5].replace(',', '.'))
-                    if int(row[4]) >= performance_analysis[3]:
+                    if int(row[4]) >= performance_results   [3]:
                         hss = float(row[5].replace(',', '.'))
             else:
                 if int(row[4]) == 3:
@@ -247,6 +247,8 @@ def to_write(configuration, result, cost):
 
 
 def performance_analysis(alfa, beta, D):
+    alfa=np.array(alfa)
+    beta=np.array(beta)
     c = np.floor(alfa/beta)+np.ones(4)
     SE = sumET(alfa, beta, c)
     while (SE >= D):
