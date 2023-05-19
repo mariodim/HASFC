@@ -167,9 +167,9 @@ def build_chain(configuration, id, threshold, performance_analysis=None):
                     if int(row[4]) >= performance_analysis[1]:
                         s_cscf = float(row[5].replace(',', '.'))
                     if int(row[4]) >= performance_analysis[2]:
-                        hss = float(row[5].replace(',', '.'))
-                    if int(row[4]) >= performance_analysis[3]:
                         i_cscf = float(row[5].replace(',', '.'))
+                    if int(row[4]) >= performance_analysis[3]:
+                        hss = float(row[5].replace(',', '.'))
             else:
                 if int(row[4]) == 3:
                     if float(row[5].replace(',', '.')) >= threshold:
