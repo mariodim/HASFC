@@ -14,12 +14,18 @@ DEFINITION = "\nDEFINITION_PARAMETER "
 POSITION = " 9.41 2.07"
 
 
-def async_operation(id, configuration, parameters):
-    run_timenet(parameters, id)
-    elaboration(configuration, id)
+def async_operation(id, data):
+    if 'performability' in data:
+        performability = data['performability']
+        performance_analysis = performance_analysis(performability['alpha'], performability['beta'], performability['d'])
+        run_timenet(data['parameters'], id, performance_analysis)
+        elaboration(data['configuration'], id, performance_analysis)
+    else:
+        run_timenet(data['parameters'], id)
+        elaboration(data['configuration'], id)
 
 
-def run_timenet(parameters, id):
+def run_timenet(parameters, id, performance_analysis=None):
     try:
         max_VNF = min(parameters.pop('maxVNF'), 6)
         max_NR = min(parameters.pop('maxNR'), 4)
@@ -47,7 +53,11 @@ def run_timenet(parameters, id):
         # Init output file
         output_file = open(f"{id}.csv", "w+")
         output_file.write("VNF1;VNF2;VNF3;VNF4;perf;parallelo\n")
-        for perf in range(3, 5):
+        min_perf,max_perf=3,5
+        if performance_analysis != None:
+            min_perf = min(performance_analysis)
+            max_perf = max(performance_analysis)
+        for perf in range(min_perf, max_perf+1):
             for value in values:
                 VNF1 = value[0]
                 VNF2 = 0 if len(value) < 2 else value[1]
@@ -123,17 +133,22 @@ def read_result(id):
     return result
 
 
-def elaboration(configuration, id):
+def elaboration(configuration, id, performance_analysis=None):
     for threshold in configuration['availability_target']:
-        parallel_elab(configuration, id, threshold)
+        build_chain(configuration, id, threshold, performance_analysis)
 
 
-def parallel_elab(configuration, id, threshold):
+def build_chain(configuration, id, threshold, performance_analysis=None):
+
+    if 'costs' not in configuration:
+        costs = [1,1,1]
+    else:
+        costs = configuration['costs']
+
     weights = configuration['weights']
-    costs = configuration['costs']
 
     filename = f"{id}.csv"
-    cscf = {}
+    p_cscf, s_cscf, i_cscf = {},{},{}
     hss = {}
     out_filename = f"results//{id}_{threshold}_results.csv"
 
@@ -145,12 +160,25 @@ def parallel_elab(configuration, id, threshold):
                 line_count += 1
                 continue
             conf = ','.join(row[:4])
-            if int(row[4]) == 3:
+            if performance_analysis != None:
                 if float(row[5].replace(',', '.')) >= threshold:
-                    cscf[conf] = float(row[5].replace(',', '.'))
-            elif int(row[4]) == 4:
-                if float(row[5].replace(',', '.')) >= threshold:
-                    hss[conf] = float(row[5].replace(',', '.'))
+                    if int(row[4]) >= performance_analysis[0]:
+                        p_cscf = float(row[5].replace(',', '.'))
+                    if int(row[4]) >= performance_analysis[1]:
+                        s_cscf = float(row[5].replace(',', '.'))
+                    if int(row[4]) >= performance_analysis[2]:
+                        hss = float(row[5].replace(',', '.'))
+                    if int(row[4]) >= performance_analysis[3]:
+                        i_cscf = float(row[5].replace(',', '.'))
+            else:
+                if int(row[4]) == 3:
+                    if float(row[5].replace(',', '.')) >= threshold:
+                        p_cscf[conf] = float(row[5].replace(',', '.'))
+                        i_cscf[conf] = float(row[5].replace(',', '.'))
+                        s_cscf[conf] = float(row[5].replace(',', '.'))
+                elif int(row[4]) == 4:
+                    if float(row[5].replace(',', '.')) >= threshold:
+                        hss[conf] = float(row[5].replace(',', '.'))
 
     minCost = float('inf')
     with open(out_filename, mode='w', newline='') as h_file:
@@ -178,19 +206,19 @@ def parallel_elab(configuration, id, threshold):
             parH = hss[h]
             if costH > minCost * weights[0] or parH < threshold:
                 continue
-            for i in cscf:
+            for i in i_cscf:
                 costIH = cost_calculator(i, costs=costs) + costH
-                parIH = cscf[i] * parH
+                parIH = i_cscf[i] * parH
                 if costIH > minCost * weights[1] or parIH < threshold:
                     continue
-                for p in cscf:
+                for p in p_cscf:
                     costPIH = cost_calculator(p, costs=costs) + costIH
-                    parPIH = cscf[p] * parIH
+                    parPIH = p_cscf[p] * parIH
                     if costPIH > minCost * weights[2] or parPIH < threshold:
                         continue
-                    for s in cscf:
+                    for s in s_cscf:
                         cost = cost_calculator(s, costs=costs) + costPIH
-                        par = cscf[s] * parPIH
+                        par = s_cscf[s] * parPIH
                         if cost > minCost * weights[3] or par < threshold:
                             continue
                         h_writer.writerow(to_write([p, s, i, h], par, cost))
@@ -216,3 +244,30 @@ def to_write(configuration, result, cost):
     to_write.append(str(result))
     to_write.append(str(cost))
     return to_write
+
+
+def performance_analysis(alfa, beta, D):
+    c = np.floor(alfa/beta)+np.ones(4)
+    SE = sumET(alfa, beta, c)
+    while (SE >= D):
+        c += calculateE(alfa, beta, c)
+        SE = sumET(alfa, beta, c)
+    return c
+
+def sumET(alfa, beta, c):
+    return sum(etn(alfa[i], beta[i], c[i]) for i in range(len(c)))
+
+def etn(alfan, betan, cn):
+    dist = np.random.normal(1/betan, 0.01, 1)
+    cvquad=(np.std(dist)/np.mean(dist))**2
+    rho = alfan/(betan*cn)
+    return (rho/(betan*(1-rho)))*0.5*(1+cvquad)
+
+
+def calculateE(alfa, beta, c):
+    deltaET = np.zeros(4)
+    for p in range(4):
+        deltaET[p] =  etn(alfa[p], beta[p], c[p]) - etn(alfa[p], beta[p], c[p]+1)
+    r = np.zeros(4)
+    r[np.argmin(np.ones(4)/deltaET)]=1
+    return r

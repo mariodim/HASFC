@@ -12,12 +12,12 @@ api = Api(app)
 def availability():
     try:
         if request.method == 'POST':
-            configuration, parameters = validation.validate_post_availability_input(
+            data = validation.validate_post_availability_input(
                 request.get_json())
-            return controller.availability_post(configuration, parameters)
+            return controller.availability_post(data)
         else:
-            parameters = validation.validate_get_availability_input(request)
-            return controller.availability_get(parameters)
+            data = validation.validate_get_availability_input(request)
+            return controller.availability_get(data)
     except validation.ValidationException as e:
         return Response(response=str(e), status=400, mimetype="text/plain")
     except Exception as e:
@@ -28,12 +28,12 @@ def availability():
 def performability():
     try:
         if request.method == 'POST':
-            configuration, parameters = validation.validate_post_performability_input(
+            data = validation.validate_post_performability_input(
                 request.get_json())
-            return controller.performability_post(configuration, parameters)
+            return controller.performability_post(data)
         else:
-            parameters = validation.validate_get_performability_input(request)
-            return controller.performability_get(parameters)
+            data = validation.validate_get_performability_input(request)
+            return controller.performability_get(data)
     except validation.ValidationException as e:
         return Response(response=str(e), status=400, mimetype="text/plain")
     except Exception as e:

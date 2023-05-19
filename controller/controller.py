@@ -7,8 +7,8 @@ from source.cache import *
 from source.validation import ValidationException
 
 
-def availability_post(configuration, parameters):
-    input_hash = hash_input(parameters, configuration)
+def availability_post(data):
+    input_hash = hash_input(data)
     id = check_cache(input_hash)
     if id is not None:
         return {
@@ -18,7 +18,7 @@ def availability_post(configuration, parameters):
 
     id = str(uuid.uuid1())
     pool = Pool(1)
-    pool.apply_async(async_operation, [id, configuration, parameters])
+    pool.apply_async(async_operation, [id, data])
 
     with open("cache/CACHE", "a+") as cache_file:
         cache_file.write(str(input_hash) + ";" + id + "\n")
@@ -29,10 +29,10 @@ def availability_post(configuration, parameters):
         'Id': id}
 
 
-def availability_get(parameters):
-    availability_target = parameters['availability_target']
-    id = parameters['id']
-    maxSFC = parameters['maxSFC']
+def availability_get(data):
+    availability_target = data['availability_target']
+    id = data['id']
+    maxSFC = data['maxSFC']
     try:
         with open("logs//" + id + "_log", 'r') as logfile:
             last_line = logfile.readlines()[-1]
@@ -67,9 +67,9 @@ def availability_get(parameters):
         raise ValidationException('Id not found')
 
 
-def performability_post(configuration, parameters):
-    return availability_post(configuration, parameters)
+def performability_post(data):
+    return availability_post(data)
 
 
-def performability_get(parameters):
-    return availability_get(parameters)
+def performability_get(data):
+    return availability_get(data)

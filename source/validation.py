@@ -17,11 +17,11 @@ def validate_post_availability_input(data):
     availability_target = get_availability_target(data)
     # pruning algorithm weights, could be configurable
     weights = [0.5, 0.75, 1, 1.25]
-    configuration = {'costs': costs, 'weights': weights,
-                     'availability_target': availability_target}
     parameters = validate_parameters(data)
 
-    return configuration, parameters
+    data_analysis = {'parameters': parameters, 'configuration': {'costs': costs, 'weights': weights,
+                     'availability_target': availability_target}}
+    return data_analysis
 
 
 def get_availability_target(data):
@@ -119,13 +119,13 @@ def validate_get_availability_input(request):
 def validate_post_performability_input(data):
     performability = get_performability_params(data)
     availability_target = get_availability_target(data)
+    parameters = validate_parameters(data)
     # pruning algorithm weights, could be configurable
     weights = [0.5, 0.75, 1, 1.25]
 
-    configuration = {'performability': performability, 'weights': weights,
-                     'availability_target': availability_target}
-    parameters = validate_parameters(data)
-    return configuration, parameters
+    data_analysis = {'parameters': parameters, 'performability': performability, 'configuration': {'weights': weights,
+                     'availability_target': availability_target}}
+    return data_analysis
 
 
 def get_performability_params(data):

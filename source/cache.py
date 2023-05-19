@@ -18,7 +18,7 @@ def check_cache(input_hash):
         raise CacheException('Cache file not found')
 
 
-def hash_input(parameters, configuration):
-    input_hash = str(parameters) + str(configuration)
+def hash_input(data):
+    input_hash = str(data)
     hashed_value = hashlib.sha256(input_hash.encode('utf-8')).hexdigest()
     return hashed_value
